@@ -18,7 +18,7 @@ def authenticate(username, password):
 # Função para salvar dados no GitHub
 def save_to_github(data, filename, repo_name, branch="main"):
     # Substitua pelo seu token de acesso pessoal do GitHub
-    GITHUB_TOKEN = "seu_token_aqui"
+    GITHUB_TOKEN = "#Git-321*"
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(repo_name)  # Substitua pelo nome do seu repositório (ex: "seu_usuario/nome_do_repositorio")
     

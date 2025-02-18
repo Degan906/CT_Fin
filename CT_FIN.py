@@ -17,29 +17,34 @@ def authenticate(username, password):
 
 # Função para salvar dados no GitHub
 def save_to_github(data, filename, repo_name, branch="main"):
-    GITHUB_TOKEN = "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"  # Substitua pelo seu token de acesso pessoal
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(repo_name)
-    
-    # Converte o DataFrame para CSV
-    csv_data = data.to_csv(index=False)
-    
-    # Verifica se o arquivo já existe no repositório
     try:
-        contents = repo.get_contents(filename, ref=branch)
-        repo.update_file(contents.path, f"Atualizando {filename}", csv_data, contents.sha, branch=branch)
-        st.success(f"Arquivo {filename} atualizado no GitHub!")
-    except:
-        repo.create_file(filename, f"Criando {filename}", csv_data, branch=branch)
-        st.success(f"Arquivo {filename} criado no GitHub!")
+        # Substitua pelo seu token de acesso pessoal
+        GITHUB_TOKEN = st.secrets["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"]  # Ou use diretamente o token
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(repo_name)
+        
+        # Converte o DataFrame para CSV
+        csv_data = data.to_csv(index=False)
+        
+        # Verifica se o arquivo já existe no repositório
+        try:
+            contents = repo.get_contents(filename, ref=branch)
+            repo.update_file(contents.path, f"Atualizando {filename}", csv_data, contents.sha, branch=branch)
+            st.success(f"Arquivo {filename} atualizado no GitHub!")
+        except Exception as e:
+            repo.create_file(filename, f"Criando {filename}", csv_data, branch=branch)
+            st.success(f"Arquivo {filename} criado no GitHub!")
+    except Exception as e:
+        st.error(f"Erro ao salvar no GitHub: {e}")
 
 # Função para carregar dados do GitHub
 def load_from_github(filename, repo_name, branch="main"):
-    GITHUB_TOKEN = "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"  # Substitua pelo seu token de acesso pessoal
-    g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(repo_name)
-    
     try:
+        # Substitua pelo seu token de acesso pessoal
+        GITHUB_TOKEN = st.secrets["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"]  # Ou use diretamente o token
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_repo(repo_name)
+        
         contents = repo.get_contents(filename, ref=branch)
         csv_data = contents.decoded_content.decode("utf-8")
         return pd.read_csv(pd.compat.StringIO(csv_data))
@@ -86,7 +91,7 @@ if not st.session_state.logged_in:
             if username not in st.session_state.user_data:
                 st.session_state.user_data[username] = load_from_github(f"{username}_transactions.csv", "seu_usuario/nome_do_repositorio")
             st.success(f"Bem-vindo, {username}!")
-            st.rerun()  # Recarregar a página após o login
+            st.experimental_rerun()  # Recarregar a página após o login
         else:
             st.error("Usuário ou senha inválidos.")
 else:
@@ -95,7 +100,7 @@ else:
     if st.sidebar.button("Sair"):
         st.session_state.logged_in = False
         st.session_state.username = None
-        st.rerun()  # Recarregar a página após o logout
+        st.experimental_rerun()  # Recarregar a página após o logout
 
     # Menu para navegação
     menu = ["Início", "Adicionar Receita", "Adicionar Despesa", "Relatório Financeiro", "Visualizar Gráficos", "Anexos"]
@@ -179,7 +184,7 @@ else:
             if st.button(f"Abrir Formulário para {choice}"):
                 st.session_state.show_form = True
                 st.session_state.form_type = choice
-                st.rerun()
+                st.experimental_rerun()
 
         # Exibir o formulário pop-up
         if st.session_state.show_form:
@@ -193,14 +198,14 @@ else:
                 if new_category:
                     st.session_state.categories[st.session_state.form_type.split()[-1]].append(new_category)
                     st.success(f"Categoria '{new_category}' adicionada com sucesso!")
-                    st.rerun()
+                    st.experimental_rerun()
 
             if st.button("Adicionar Nova Tag"):
                 new_tag = st.text_input("Digite o nome da nova tag")
                 if new_tag:
                     st.session_state.tags.append(new_tag)
                     st.success(f"Tag '{new_tag}' adicionada com sucesso!")
-                    st.rerun()
+                    st.experimental_rerun()
 
             # Formulário principal
             with st.form(key='transaction_form'):
@@ -238,12 +243,12 @@ else:
                     save_to_github(st.session_state.user_data[st.session_state.username], f"{st.session_state.username}_transactions.csv", "seu_usuario/nome_do_repositorio")
                     st.success(f"{tipo} adicionada com sucesso!")
                     st.session_state.show_form = False
-                    st.rerun()
+                    st.experimental_rerun()
 
             # Botão para fechar o formulário
             if st.button("Fechar Formulário"):
                 st.session_state.show_form = False
-                st.rerun()
+                st.experimental_rerun()
 
     elif choice == "Relatório Financeiro":
         st.subheader("Relatório Financeiro")

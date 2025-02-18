@@ -137,9 +137,6 @@ else:
                     parcelas = row["Parcelas"]
                     data = row["Data"]
 
-                    # Calcular o mês da transação
-                    transaction_month = data.strftime("%Y-%m")
-
                     # Se for fixo, adicionar em todos os meses
                     if categoria == "Fixo":
                         if tipo == "Receita":

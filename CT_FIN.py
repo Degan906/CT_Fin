@@ -89,7 +89,7 @@ if not st.session_state.logged_in:
             st.session_state.username = username
             # Inicializar DataFrame vazio para o usuário, se ainda não existir
             if username not in st.session_state.user_data:
-                st.session_state.user_data[username] = load_from_github(f"{username}_transactions.csv", "seu_usuario/nome_do_repositorio")
+                st.session_state.user_data[username] = load_from_github(f"{username}_transactions.csv", "degan906/CT_Fin")
             st.success(f"Bem-vindo, {username}!")
             st.rerun()  # Recarregar a página após o login
         else:
@@ -237,7 +237,8 @@ else:
                     st.session_state.user_data[st.session_state.username] = pd.concat(
                         [current_user_data, new_transaction], ignore_index=True
                     )
-                    save_to_github(st.session_state.user_data[st.session_state.username], f"{st.session_state.username}_transactions.csv", "seu_usuario/nome_do_repositorio")
+                    # Salvar os dados atualizados no GitHub
+                    save_to_github(st.session_state.user_data[st.session_state.username], f"{st.session_state.username}_transactions.csv", "degan906/CT_Fin")
                     st.success(f"{tipo} adicionada com sucesso!")
                     st.session_state.show_form = False
                     st.rerun()

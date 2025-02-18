@@ -91,7 +91,7 @@ if not st.session_state.logged_in:
             if username not in st.session_state.user_data:
                 st.session_state.user_data[username] = load_from_github(f"{username}_transactions.csv", "seu_usuario/nome_do_repositorio")
             st.success(f"Bem-vindo, {username}!")
-            st.experimental_rerun()  # Recarregar a página após o login
+            st.rerun()  # Recarregar a página após o login
         else:
             st.error("Usuário ou senha inválidos.")
 else:
@@ -100,7 +100,7 @@ else:
     if st.sidebar.button("Sair"):
         st.session_state.logged_in = False
         st.session_state.username = None
-        st.experimental_rerun()  # Recarregar a página após o logout
+        st.rerun()  # Recarregar a página após o logout
 
     # Menu para navegação
     menu = ["Início", "Adicionar Receita", "Adicionar Despesa", "Relatório Financeiro", "Visualizar Gráficos", "Anexos"]
@@ -184,7 +184,7 @@ else:
             if st.button(f"Abrir Formulário para {choice}"):
                 st.session_state.show_form = True
                 st.session_state.form_type = choice
-                st.experimental_rerun()
+                st.rerun()
 
         # Exibir o formulário pop-up
         if st.session_state.show_form:
@@ -198,14 +198,14 @@ else:
                 if new_category:
                     st.session_state.categories[st.session_state.form_type.split()[-1]].append(new_category)
                     st.success(f"Categoria '{new_category}' adicionada com sucesso!")
-                    st.experimental_rerun()
+                    st.rerun()
 
             if st.button("Adicionar Nova Tag"):
                 new_tag = st.text_input("Digite o nome da nova tag")
                 if new_tag:
                     st.session_state.tags.append(new_tag)
                     st.success(f"Tag '{new_tag}' adicionada com sucesso!")
-                    st.experimental_rerun()
+                    st.rerun()
 
             # Formulário principal
             with st.form(key='transaction_form'):
@@ -243,12 +243,12 @@ else:
                     save_to_github(st.session_state.user_data[st.session_state.username], f"{st.session_state.username}_transactions.csv", "seu_usuario/nome_do_repositorio")
                     st.success(f"{tipo} adicionada com sucesso!")
                     st.session_state.show_form = False
-                    st.experimental_rerun()
+                    st.rerun()
 
             # Botão para fechar o formulário
             if st.button("Fechar Formulário"):
                 st.session_state.show_form = False
-                st.experimental_rerun()
+                st.rerun()
 
     elif choice == "Relatório Financeiro":
         st.subheader("Relatório Financeiro")
@@ -285,3 +285,4 @@ else:
     elif choice == "Anexos":
         st.write("Aqui você pode gerenciar seus anexos.")
         # Implementaremos isso depois.
+        

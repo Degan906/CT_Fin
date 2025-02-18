@@ -19,7 +19,7 @@ def authenticate(username, password):
 def save_to_github(data, filename, repo_name, branch="main"):
     try:
         # Substitua pelo seu token de acesso pessoal
-        GITHUB_TOKEN = st.secrets["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"]  # Ou use diretamente o token
+        GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # Ou use diretamente o token
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo(repo_name)
         
@@ -41,7 +41,7 @@ def save_to_github(data, filename, repo_name, branch="main"):
 def load_from_github(filename, repo_name, branch="main"):
     try:
         # Substitua pelo seu token de acesso pessoal
-        GITHUB_TOKEN = st.secrets["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"]  # Ou use diretamente o token
+        GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # Ou use diretamente o token
         g = Github(GITHUB_TOKEN)
         repo = g.get_repo(repo_name)
         
@@ -148,8 +148,8 @@ else:
                             total_despesas += valor
 
                     # Se for parcelado, distribuir nas parcelas
-                    elif categoria == "Parcelado" and parcelas is not None:
-                        for i in range(parcelas):
+                    elif categoria == "Parcelado" and pd.notna(parcelas):
+                        for i in range(int(parcelas)):
                             parcel_month = (data + timedelta(days=30 * i)).strftime("%Y-%m")
                             if parcel_month == month:
                                 if tipo == "Receita":
@@ -285,4 +285,3 @@ else:
     elif choice == "Anexos":
         st.write("Aqui você pode gerenciar seus anexos.")
         # Implementaremos isso depois.
-        

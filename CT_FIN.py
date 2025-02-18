@@ -17,10 +17,9 @@ def authenticate(username, password):
 
 # Função para salvar dados no GitHub
 def save_to_github(data, filename, repo_name, branch="main"):
-    # Substitua pelo seu token de acesso pessoal do GitHub
-    GITHUB_TOKEN = "#Git-321*"
+    GITHUB_TOKEN = "seu_token_aqui"  # Substitua pelo seu token de acesso pessoal
     g = Github(GITHUB_TOKEN)
-    repo = g.get_repo(repo_name)  # Substitua pelo nome do seu repositório (ex: "seu_usuario/nome_do_repositorio")
+    repo = g.get_repo(repo_name)
     
     # Converte o DataFrame para CSV
     csv_data = data.to_csv(index=False)
@@ -36,7 +35,7 @@ def save_to_github(data, filename, repo_name, branch="main"):
 
 # Função para carregar dados do GitHub
 def load_from_github(filename, repo_name, branch="main"):
-    GITHUB_TOKEN = "#Git-321*"
+    GITHUB_TOKEN = "seu_token_aqui"  # Substitua pelo seu token de acesso pessoal
     g = Github(GITHUB_TOKEN)
     repo = g.get_repo(repo_name)
     
@@ -44,7 +43,8 @@ def load_from_github(filename, repo_name, branch="main"):
         contents = repo.get_contents(filename, ref=branch)
         csv_data = contents.decoded_content.decode("utf-8")
         return pd.read_csv(pd.compat.StringIO(csv_data))
-    except:
+    except Exception as e:
+        st.warning(f"Erro ao carregar dados do GitHub: {e}")
         return pd.DataFrame(columns=[
             "Tipo", "Resumo", "Descrição", "Valor", "Data", "Categoria", "Contato", "Tag", "Obs", "Parcelas"
         ])
@@ -86,7 +86,7 @@ if not st.session_state.logged_in:
             if username not in st.session_state.user_data:
                 st.session_state.user_data[username] = load_from_github(f"{username}_transactions.csv", "seu_usuario/nome_do_repositorio")
             st.success(f"Bem-vindo, {username}!")
-            st.rerun()  # Recarregar a página após o login
+            st.experimental_rerun()  # Recarregar a página após o login
         else:
             st.error("Usuário ou senha inválidos.")
 else:
@@ -95,7 +95,7 @@ else:
     if st.sidebar.button("Sair"):
         st.session_state.logged_in = False
         st.session_state.username = None
-        st.rerun()  # Recarregar a página após o logout
+        st.experimental_rerun()  # Recarregar a página após o logout
 
     # Menu para navegação
     menu = ["Início", "Adicionar Receita", "Adicionar Despesa", "Relatório Financeiro", "Visualizar Gráficos", "Anexos"]
@@ -105,8 +105,8 @@ else:
         st.subheader("Projeção Financeira")
 
         # Obter o DataFrame do usuário atual
-        current_user_data = st.session_state.user_data[st.session_state.username]
-
+        current_user_data = st.session_state.user_data.get(st.session_state.username, pd.DataFrame())
+        
         if not current_user_data.empty:
             # Converter a coluna "Data" para datetime, se ainda não estiver
             current_user_data["Data"] = pd.to_datetime(current_user_data["Data"])
@@ -123,8 +123,7 @@ else:
 
             # Preencher a tabela com receitas e despesas fixas e parceladas
             for month in projected_months:
-                total_receitas = 0
-                total_despesas = 0
+                total_receitas, total_despesas = 0, 0
 
                 for _, row in current_user_data.iterrows():
                     tipo = row["Tipo"]
@@ -174,19 +173,19 @@ else:
         # Botão para abrir o formulário
         if not st.session_state.show_form:
             st.subheader("Transações Atuais")
-            current_user_data = st.session_state.user_data[st.session_state.username]
+            current_user_data = st.session_state.user_data.get(st.session_state.username, pd.DataFrame())
             st.dataframe(current_user_data)
 
             if st.button(f"Abrir Formulário para {choice}"):
                 st.session_state.show_form = True
                 st.session_state.form_type = choice
-                st.rerun()
+                st.experimental_rerun()
 
         # Exibir o formulário pop-up
         if st.session_state.show_form:
             st.subheader(f"{st.session_state.form_type}")
 
-            current_user_data = st.session_state.user_data[st.session_state.username]
+            current_user_data = st.session_state.user_data.get(st.session_state.username, pd.DataFrame())
 
             # Botões para adicionar nova categoria e tag (fora do formulário)
             if st.button("Adicionar Nova Categoria"):
@@ -194,14 +193,14 @@ else:
                 if new_category:
                     st.session_state.categories[st.session_state.form_type.split()[-1]].append(new_category)
                     st.success(f"Categoria '{new_category}' adicionada com sucesso!")
-                    st.rerun()
+                    st.experimental_rerun()
 
             if st.button("Adicionar Nova Tag"):
                 new_tag = st.text_input("Digite o nome da nova tag")
                 if new_tag:
                     st.session_state.tags.append(new_tag)
                     st.success(f"Tag '{new_tag}' adicionada com sucesso!")
-                    st.rerun()
+                    st.experimental_rerun()
 
             # Formulário principal
             with st.form(key='transaction_form'):
@@ -216,6 +215,7 @@ else:
                 parcelas = None
                 if st.checkbox("Parcelado"):
                     parcelas = st.number_input("Número de Parcelas", min_value=1, value=1, step=1)
+                    
                 submit_button = st.form_submit_button(label='Adicionar')
 
                 if submit_button:
@@ -238,18 +238,18 @@ else:
                     save_to_github(st.session_state.user_data[st.session_state.username], f"{st.session_state.username}_transactions.csv", "seu_usuario/nome_do_repositorio")
                     st.success(f"{tipo} adicionada com sucesso!")
                     st.session_state.show_form = False
-                    st.rerun()
+                    st.experimental_rerun()
 
             # Botão para fechar o formulário
             if st.button("Fechar Formulário"):
                 st.session_state.show_form = False
-                st.rerun()
+                st.experimental_rerun()
 
     elif choice == "Relatório Financeiro":
         st.subheader("Relatório Financeiro")
 
         # Obter o DataFrame do usuário atual
-        current_user_data = st.session_state.user_data[st.session_state.username]
+        current_user_data = st.session_state.user_data.get(st.session_state.username, pd.DataFrame())
 
         if not current_user_data.empty:
             # Calcular totais de receitas e despesas

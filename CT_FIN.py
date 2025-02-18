@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import plotly.express as px
+from github import Github
 
 # Dicionário de usuários (temporário)
 USERS = {
@@ -13,6 +14,40 @@ USERS = {
 # Função para verificar login
 def authenticate(username, password):
     return USERS.get(username) == password
+
+# Função para salvar dados no GitHub
+def save_to_github(data, filename, repo_name, branch="main"):
+    # Substitua pelo seu token de acesso pessoal do GitHub
+    GITHUB_TOKEN = "seu_token_aqui"
+    g = Github(GITHUB_TOKEN)
+    repo = g.get_repo(repo_name)  # Substitua pelo nome do seu repositório (ex: "seu_usuario/nome_do_repositorio")
+    
+    # Converte o DataFrame para CSV
+    csv_data = data.to_csv(index=False)
+    
+    # Verifica se o arquivo já existe no repositório
+    try:
+        contents = repo.get_contents(filename, ref=branch)
+        repo.update_file(contents.path, f"Atualizando {filename}", csv_data, contents.sha, branch=branch)
+        st.success(f"Arquivo {filename} atualizado no GitHub!")
+    except:
+        repo.create_file(filename, f"Criando {filename}", csv_data, branch=branch)
+        st.success(f"Arquivo {filename} criado no GitHub!")
+
+# Função para carregar dados do GitHub
+def load_from_github(filename, repo_name, branch="main"):
+    GITHUB_TOKEN = "seu_token_aqui"
+    g = Github(GITHUB_TOKEN)
+    repo = g.get_repo(repo_name)
+    
+    try:
+        contents = repo.get_contents(filename, ref=branch)
+        csv_data = contents.decoded_content.decode("utf-8")
+        return pd.read_csv(pd.compat.StringIO(csv_data))
+    except:
+        return pd.DataFrame(columns=[
+            "Tipo", "Resumo", "Descrição", "Valor", "Data", "Categoria", "Contato", "Tag", "Obs", "Parcelas"
+        ])
 
 # Verificar se o usuário está logado
 if 'logged_in' not in st.session_state:
@@ -49,9 +84,7 @@ if not st.session_state.logged_in:
             st.session_state.username = username
             # Inicializar DataFrame vazio para o usuário, se ainda não existir
             if username not in st.session_state.user_data:
-                st.session_state.user_data[username] = pd.DataFrame(columns=[
-                    "Tipo", "Resumo", "Descrição", "Valor", "Data", "Categoria", "Contato", "Tag", "Obs", "Parcelas"
-                ])
+                st.session_state.user_data[username] = load_from_github(f"{username}_transactions.csv", "seu_usuario/nome_do_repositorio")
             st.success(f"Bem-vindo, {username}!")
             st.rerun()  # Recarregar a página após o login
         else:
@@ -202,6 +235,7 @@ else:
                     st.session_state.user_data[st.session_state.username] = pd.concat(
                         [current_user_data, new_transaction], ignore_index=True
                     )
+                    save_to_github(st.session_state.user_data[st.session_state.username], f"{st.session_state.username}_transactions.csv", "seu_usuario/nome_do_repositorio")
                     st.success(f"{tipo} adicionada com sucesso!")
                     st.session_state.show_form = False
                     st.rerun()

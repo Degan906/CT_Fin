@@ -211,7 +211,7 @@ else:
                 valor = st.number_input("Valor", min_value=0.0, format="%.2f")
                 data = st.date_input("Data")
                 categoria = st.selectbox("Categoria", st.session_state.categories[st.session_state.form_type.split()[-1]])
-                contato = st.selectbox("Contato", ["Vanessa Degan", "Henrique Degan"])
+                contato = st.selectbox("Contato", ["Vanessa Degan","Henrique Degan"])
                 tag = st.selectbox("Tag", st.session_state.tags)
                 obs = st.text_area("Observação")
                 parcelas = None
